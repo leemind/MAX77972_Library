@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(MAX77972_ESP32S3)
+
+# Set the target
+set(IDF_TARGET esp32s3)
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+
+project_start()

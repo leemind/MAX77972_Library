@@ -1,0 +1,7 @@
+version: "1.0.0"
+description: "MAX77972 AccuCharge + ModelGauge Fuel Gauge Driver for ESP32-S3"
+documentation: "https://www.analog.com/en/products/max77972.html"
+target_version: "5.0"
+dependencies:
+  esp_driver_i2c: ">=1.0.0"
+  freertos: ">=1.0.0"
