@@ -931,6 +931,440 @@ esp_err_t MAX77972::set_soc_alert_threshold(uint8_t threshold_pct) {
 }
 
 // ============================================================================
+// ADVANCED FUEL GAUGE CONFIGURATION
+// ============================================================================
+
+esp_err_t MAX77972::set_filter_config(uint8_t voltage_filter, uint8_t current_filter, uint8_t temp_filter) {
+    // FilterCfg register configures averaging filters
+    uint8_t cfg = (voltage_filter & 0x03) | ((current_filter & 0x03) << 2) | ((temp_filter & 0x03) << 4);
+    return write_register(FilterCfg, cfg);
+}
+
+esp_err_t MAX77972::set_relaxation_config(uint8_t relax_cfg) {
+    // RelaxCfg register controls relaxation voltage measurement
+    return write_register(RelaxCfg, relax_cfg);
+}
+
+esp_err_t MAX77972::set_learning_config(uint8_t learn_cfg) {
+    // Stores fuel gauge learning configuration
+    return write_register(NRCfg, learn_cfg);
+}
+
+esp_err_t MAX77972::set_hibernation_config(uint16_t hib_threshold, bool hib_enable) {
+    // HibCfg register controls hibernation mode behavior
+    uint8_t cfg = hib_enable ? 0x01 : 0x00;
+    cfg |= (hib_threshold & 0x07) << 1;
+    return write_register(HibCfg, cfg);
+}
+
+esp_err_t MAX77972::set_adc_config(uint8_t adc_cfg) {
+    // ADCCfg register controls analog-to-digital conversion
+    return write_register(ADCCfg, adc_cfg);
+}
+
+esp_err_t MAX77972::get_adc_config(uint8_t* adc_cfg) {
+    if (adc_cfg == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(ADCCfg, adc_cfg);
+}
+
+// ============================================================================
+// CELL CHARACTERIZATION & LEARNING DATA
+// ============================================================================
+
+esp_err_t MAX77972::set_charge_termination_current(uint16_t iterm_ma) {
+    // IChgTerm register - charge termination current
+    uint8_t value = (iterm_ma / 25); // Typical LSB is 25mA
+    if (value > 0xFF) value = 0xFF;
+    return write_register(IChgTerm, value);
+}
+
+esp_err_t MAX77972::get_charge_termination_current(uint16_t* iterm_ma) {
+    if (iterm_ma == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value;
+    esp_err_t ret = read_register(IChgTerm, &value);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    *iterm_ma = value * 25; // Convert back to mA
+    return ESP_OK;
+}
+
+esp_err_t MAX77972::set_rcomp(uint8_t rcomp) {
+    // RCOMP0 register - resistance compensation
+    return write_register(RCOMP0, rcomp);
+}
+
+esp_err_t MAX77972::get_rcomp(uint8_t* rcomp) {
+    if (rcomp == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(RCOMP0, rcomp);
+}
+
+esp_err_t MAX77972::set_temp_coefficient(uint8_t tempco) {
+    // TempCo register - temperature coefficient
+    return write_register(TempCo, tempco);
+}
+
+esp_err_t MAX77972::get_temp_coefficient(uint8_t* tempco) {
+    if (tempco == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(TempCo, tempco);
+}
+
+esp_err_t MAX77972::set_current_calibration(uint8_t cgain, uint8_t coff) {
+    // Set current gain and offset for calibration
+    esp_err_t ret = write_register(CGain, cgain);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    return write_register(COff, coff);
+}
+
+esp_err_t MAX77972::get_current_calibration(uint8_t* cgain, uint8_t* coff) {
+    if (cgain == nullptr || coff == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    esp_err_t ret = read_register(CGain, cgain);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    return read_register(COff, coff);
+}
+
+esp_err_t MAX77972::read_design_capacity(uint16_t* capacity_mah) {
+    if (capacity_mah == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t data[2];
+    esp_err_t ret = read_registers(DesignCap, data, 2);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    uint16_t raw = (data[0] << 8) | data[1];
+    *capacity_mah = (raw * 5) / 10; // Convert to mAh
+    return ESP_OK;
+}
+
+esp_err_t MAX77972::write_design_capacity(uint16_t capacity_mah) {
+    // Convert mAh to register format
+    uint16_t raw = (capacity_mah * 10) / 5;
+    uint8_t data[2] = {
+        static_cast<uint8_t>((raw >> 8) & 0xFF),
+        static_cast<uint8_t>(raw & 0xFF)
+    };
+    return write_registers(DesignCap, data, 2);
+}
+
+esp_err_t MAX77972::read_ocv_table(uint8_t table_index, uint8_t* data) {
+    if (data == nullptr || table_index > 5) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t base_register = OCVTable0 + (table_index * 16);
+    return read_registers(base_register, data, 16);
+}
+
+esp_err_t MAX77972::write_ocv_table(uint8_t table_index, const uint8_t* data) {
+    if (data == nullptr || table_index > 5) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t base_register = OCVTable0 + (table_index * 16);
+    return write_registers(base_register, data, 16);
+}
+
+// ============================================================================
+// ADVANCED CHARGER CONFIGURATION
+// ============================================================================
+
+esp_err_t MAX77972::set_chgin_offset(uint8_t offset) {
+    // Set CHGIN current measurement offset
+    return modify_register(CHGIN_CTRL_0, 0x0F, offset & 0x0F);
+}
+
+esp_err_t MAX77972::set_chgin_regulation_voltage(uint16_t voltage_mv) {
+    // CHGIN_CTRL_1 - external input voltage regulation
+    // Typical steps: 25mV per bit, starting from 3.925V
+    if (voltage_mv < 3925 || voltage_mv > 10800) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value = (voltage_mv - 3925) / 25;
+    return modify_register(CHGIN_CTRL_1, 0xFF, value);
+}
+
+esp_err_t MAX77972::get_chgin_regulation_voltage(uint16_t* voltage_mv) {
+    if (voltage_mv == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value;
+    esp_err_t ret = read_register(CHGIN_CTRL_1, &value);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    *voltage_mv = 3925 + (value * 25);
+    return ESP_OK;
+}
+
+esp_err_t MAX77972::set_sys_min_voltage(uint16_t voltage_mv) {
+    // Set minimum system voltage (SysMin) in CHG_CNFG_01
+    if (voltage_mv < 3000 || voltage_mv > 3700) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value = (voltage_mv - 3000) / 50;
+    return modify_register(CHG_CNFG_01, 0x3F, (value & 0x3F));
+}
+
+esp_err_t MAX77972::set_watchdog_timer(uint8_t timeout_sec) {
+    // Watchdog timer in CHG_CNFG_06
+    // 0: Disable, 1: 40 sec, 2: 80 sec, 3: 160 sec
+    uint8_t value;
+    if (timeout_sec == 0) {
+        value = 0;
+    } else if (timeout_sec <= 40) {
+        value = 1;
+    } else if (timeout_sec <= 80) {
+        value = 2;
+    } else {
+        value = 3;
+    }
+
+    return modify_register(CHG_CNFG_06, 0xC0, (value << 6));
+}
+
+esp_err_t MAX77972::clear_watchdog() {
+    // Clear watchdog by toggling the timer
+    return modify_register(CHG_CNFG_06, 0x20, 0x20);
+}
+
+esp_err_t MAX77972::set_otg_mode(bool enable) {
+    // OTG mode controlled in CHG_CNFG_00
+    return modify_register(CHG_CNFG_00, 0x80, enable ? 0x80 : 0x00);
+}
+
+esp_err_t MAX77972::set_otg_voltage(uint16_t voltage_mv) {
+    // OTG voltage in CHG_CNFG_17
+    // Typical steps: 50mV, range 4500-5500mV
+    if (voltage_mv < 4500 || voltage_mv > 5500) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value = (voltage_mv - 4500) / 50;
+    return modify_register(CHG_CNFG_17, 0x1F, value & 0x1F);
+}
+
+esp_err_t MAX77972::configure_boost_converter(bool boost_enable, uint16_t boost_voltage) {
+    // Enable/disable boost converter in CHG_CNFG_00
+    esp_err_t ret = modify_register(CHG_CNFG_00, 0x10, boost_enable ? 0x10 : 0x00);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    // Set boost voltage in CHG_CNFG_16
+    if (boost_voltage < 3600 || boost_voltage > 5500) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value = (boost_voltage - 3600) / 50;
+    return modify_register(CHG_CNFG_16, 0x3F, value & 0x3F);
+}
+
+esp_err_t MAX77972::set_precharge_config(uint16_t vprechg_mv, uint16_t iprechg_ma) {
+    // Precharge configuration in CHG_CNFG_04
+    // Voltage: bits 4-5, Current: bits 0-3
+    uint8_t vprechg_bits;
+    if (vprechg_mv >= 3200) {
+        vprechg_bits = 3;
+    } else if (vprechg_mv >= 2400) {
+        vprechg_bits = 2;
+    } else {
+        vprechg_bits = 0;
+    }
+
+    uint8_t iprechg_bits = (iprechg_ma / 50); // 50mA steps
+    if (iprechg_bits > 0x0F) iprechg_bits = 0x0F;
+
+    uint8_t value = (vprechg_bits << 4) | (iprechg_bits & 0x0F);
+    return modify_register(CHG_CNFG_04, 0x3F, value);
+}
+
+esp_err_t MAX77972::set_fast_charge_hysteresis(uint16_t hysteresis_mv) {
+    // Fast charge restart hysteresis in CHG_CNFG_02
+    // Typical steps: 50mV
+    if (hysteresis_mv > 200) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t value = hysteresis_mv / 50;
+    return modify_register(CHG_CNFG_02, 0x03, value & 0x03);
+}
+
+// ============================================================================
+// NON-VOLATILE CHARGER CONFIGURATION (nChgConfig)
+// ============================================================================
+
+esp_err_t MAX77972::read_nchg_config(uint8_t start_index, uint8_t* data, uint8_t len) {
+    if (data == nullptr || start_index > 12 || len == 0 || (start_index + len) > 13) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t start_reg = nChgCfg0 + start_index;
+    return read_registers(start_reg, data, len);
+}
+
+esp_err_t MAX77972::write_nchg_config(uint8_t start_index, const uint8_t* data, uint8_t len) {
+    if (data == nullptr || start_index > 12 || len == 0 || (start_index + len) > 13) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t start_reg = nChgCfg0 + start_index;
+    return write_registers(start_reg, data, len);
+}
+
+esp_err_t MAX77972::read_all_nchg_config(uint8_t* data) {
+    if (data == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Read all 13 nChgConfig blocks (nChgCfg0 through nChgCfg12)
+    return read_registers(nChgCfg0, data, 13);
+}
+
+esp_err_t MAX77972::write_all_nchg_config(const uint8_t* data) {
+    if (data == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Write all 13 nChgConfig blocks (nChgCfg0 through nChgCfg12)
+    return write_registers(nChgCfg0, data, 13);
+}
+
+esp_err_t MAX77972::get_nchg_config_0(uint8_t* config) {
+    if (config == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg0, config);
+}
+
+esp_err_t MAX77972::set_nchg_config_0(uint8_t config) {
+    return write_register(nChgCfg0, config);
+}
+
+esp_err_t MAX77972::get_nchg_config_1(uint8_t* config) {
+    if (config == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg1, config);
+}
+
+esp_err_t MAX77972::set_nchg_config_1(uint8_t config) {
+    return write_register(nChgCfg1, config);
+}
+
+esp_err_t MAX77972::get_nchg_config_2(uint8_t* config) {
+    if (config == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg2, config);
+}
+
+esp_err_t MAX77972::set_nchg_config_2(uint8_t config) {
+    return write_register(nChgCfg2, config);
+}
+
+esp_err_t MAX77972::get_boost_calibration(uint8_t* calib) {
+    if (calib == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg8, calib);
+}
+
+esp_err_t MAX77972::set_boost_calibration(uint8_t calib) {
+    return write_register(nChgCfg8, calib);
+}
+
+esp_err_t MAX77972::get_input_current_calib(uint8_t* calib) {
+    if (calib == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg9, calib);
+}
+
+esp_err_t MAX77972::set_input_current_calib(uint8_t calib) {
+    return write_register(nChgCfg9, calib);
+}
+
+esp_err_t MAX77972::get_charge_current_offset(uint8_t* offset) {
+    if (offset == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg10, offset);
+}
+
+esp_err_t MAX77972::set_charge_current_offset(uint8_t offset) {
+    return write_register(nChgCfg10, offset);
+}
+
+esp_err_t MAX77972::get_ic_offset_trim(uint8_t* offset_trim) {
+    if (offset_trim == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg11, offset_trim);
+}
+
+esp_err_t MAX77972::set_ic_offset_trim(uint8_t offset_trim) {
+    return write_register(nChgCfg11, offset_trim);
+}
+
+esp_err_t MAX77972::get_thermal_zone_boundary_1(uint8_t* boundary) {
+    if (boundary == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg5, boundary);
+}
+
+esp_err_t MAX77972::set_thermal_zone_boundary_1(uint8_t boundary) {
+    return write_register(nChgCfg5, boundary);
+}
+
+esp_err_t MAX77972::get_thermal_zone_boundary_2(uint8_t* boundary) {
+    if (boundary == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg6, boundary);
+}
+
+esp_err_t MAX77972::set_thermal_zone_boundary_2(uint8_t boundary) {
+    return write_register(nChgCfg6, boundary);
+}
+
+esp_err_t MAX77972::get_thermal_zone_boundary_3(uint8_t* boundary) {
+    if (boundary == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return read_register(nChgCfg7, boundary);
+}
+
+esp_err_t MAX77972::set_thermal_zone_boundary_3(uint8_t boundary) {
+    return write_register(nChgCfg7, boundary);
+}
+
+// ============================================================================
 // CONFIGURATION & RESET FUNCTIONS
 // ============================================================================
 

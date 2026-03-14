@@ -33,60 +33,110 @@ constexpr uint8_t CHG_DTLS_00 = 0x01;        // Charger Details 00
 constexpr uint8_t CHG_DTLS_01 = 0x02;        // Charger Details 01
 constexpr uint8_t CHG_DTLS_02 = 0x03;        // Charger Details 02
 constexpr uint8_t CHG_CTRL = 0x04;           // Charger Control
+constexpr uint8_t CHG_INT_MASK = 0x05;       // Charger Interrupt Mask
+constexpr uint8_t CHG_INT_OK = 0x10;         // Charger Interrupt OK
+constexpr uint8_t INOK_INT = 0x0B;           // Input OK Interrupt
+constexpr uint8_t INOK_INT_MASK = 0x0C;      // Input OK Interrupt Mask
 
 // USB Detection and Configuration
 constexpr uint8_t USBC_CTRL_1 = 0x06;        // USB Type-C Control 1
 constexpr uint8_t USBC_CTRL_2 = 0x07;        // USB Type-C Control 2
 constexpr uint8_t USBC_CTRL_3 = 0x08;        // USB Type-C Control 3
-constexpr uint8_t CHG_CNFG_00 = 0x20;        // Charger Configuration 00
-constexpr uint8_t CHG_CNFG_01 = 0x21;        // Charger Configuration 01
-constexpr uint8_t CHG_CNFG_02 = 0x22;        // Charger Configuration 02
-constexpr uint8_t CHG_CNFG_03 = 0x23;        // Charger Configuration 03
-constexpr uint8_t CHG_CNFG_04 = 0x24;        // Charger Configuration 04
-constexpr uint8_t CHG_CNFG_05 = 0x25;        // Charger Configuration 05
-constexpr uint8_t CHG_CNFG_06 = 0x26;        // Charger Configuration 06
-constexpr uint8_t CHG_CNFG_07 = 0x27;        // Charger Configuration 07
-constexpr uint8_t CHG_CNFG_08 = 0x28;        // Charger Configuration 08
-constexpr uint8_t CHG_CNFG_09 = 0x29;        // Charger Configuration 09
-constexpr uint8_t CHG_CNFG_10 = 0x2A;        // Charger Configuration 10
-constexpr uint8_t CHG_CNFG_11 = 0x2B;        // Charger Configuration 11
-constexpr uint8_t CHG_CNFG_12 = 0x2C;        // Charger Configuration 12
-constexpr uint8_t CHG_CNFG_13 = 0x2D;        // Charger Configuration 13
-constexpr uint8_t CHG_CNFG_14 = 0x2E;        // Charger Configuration 14
-constexpr uint8_t CHG_CNFG_15 = 0x2F;        // Charger Configuration 15
+constexpr uint8_t BC_STATUS = 0x09;          // BC Detection Status
+constexpr uint8_t BC_CTRL = 0x0A;            // BC Detection Control
 
 // Power Input Registers
-constexpr uint8_t INOK_INT = 0x0B;           // Input OK Interrupt
 constexpr uint8_t CHGIN_CTRL_0 = 0x13;       // CHGIN Control 0
 constexpr uint8_t CHGIN_CTRL_1 = 0x14;       // CHGIN Control 1
+constexpr uint8_t CHGIN_CTRL_2 = 0x15;       // CHGIN Control 2
 
 // Thermistor and Die Temperature
 constexpr uint8_t THM_CNFG = 0x0D;           // Thermistor Configuration
+constexpr uint8_t THM_CNFG2 = 0x0E;          // Thermistor Configuration 2
+constexpr uint8_t ADCCFG = 0x0F;             // ADC Configuration
+constexpr uint8_t ADCCFG2 = 0x10;            // ADC Configuration 2
 
-// Fuel Gauge / ModelGauge Registers (0x80h - 0xFFh)
+// Charger Configuration Registers
+constexpr uint8_t CHG_CNFG_00 = 0x20;        // Charger Configuration 00
+constexpr uint8_t CHG_CNFG_01 = 0x21;        // Charger Configuration 01
+constexpr uint8_t CHG_CNFG_02 = 0x22;        // Charger Configuration 02 (Fast Charge Current)
+constexpr uint8_t CHG_CNFG_03 = 0x23;        // Charger Configuration 03 (Regulation Voltage)
+constexpr uint8_t CHG_CNFG_04 = 0x24;        // Charger Configuration 04 (AICL & Charging Current)
+constexpr uint8_t CHG_CNFG_05 = 0x25;        // Charger Configuration 05 (Deep Sleep)
+constexpr uint8_t CHG_CNFG_06 = 0x26;        // Charger Configuration 06 (Thermistor)
+constexpr uint8_t CHG_CNFG_07 = 0x27;        // Charger Configuration 07 (Thermal Regulation 1)
+constexpr uint8_t CHG_CNFG_08 = 0x28;        // Charger Configuration 08 (Thermal Regulation 2)
+constexpr uint8_t CHG_CNFG_09 = 0x29;        // Charger Configuration 09
+constexpr uint8_t CHG_CNFG_10 = 0x2A;        // Charger Configuration 10 (JEITA Protection 1)
+constexpr uint8_t CHG_CNFG_11 = 0x2B;        // Charger Configuration 11 (JEITA Protection 2)
+constexpr uint8_t CHG_CNFG_12 = 0x2C;        // Charger Configuration 12 (Input Voltage Regulation)
+constexpr uint8_t CHG_CNFG_13 = 0x2D;        // Charger Configuration 13 (Charge Termination)
+constexpr uint8_t CHG_CNFG_14 = 0x2E;        // Charger Configuration 14 (Watchdog Timer)
+constexpr uint8_t CHG_CNFG_15 = 0x2F;        // Charger Configuration 15 (SYS Minimum Voltage)
+
+// Boost Converter Registers
+constexpr uint8_t CHG_CNFG_16 = 0x30;        // Charger Configuration 16 (Boost Mode)
+constexpr uint8_t CHG_CNFG_17 = 0x31;        // Charger Configuration 17 (Boost Voltage)
+constexpr uint8_t CHG_CNFG_18 = 0x32;        // Charger Configuration 18 (Boost Current Limit)
+
+// System Registers
+constexpr uint8_t COMMAND = 0xFE;            // Command Register (Reset)
+
+// ============================================================================
+// FUEL GAUGE / ModelGauge m5 REGISTERS (0x80h - 0xFFh)
+// ============================================================================
+
+// Status and Configuration
 constexpr uint8_t Status = 0xB0;             // Status Register
+constexpr uint8_t Status2 = 0xB1;            // Status 2 Register
 constexpr uint8_t Config = 0xBD;             // Configuration Register
 constexpr uint8_t Config2 = 0xBB;            // Configuration 2 Register
 constexpr uint8_t FilterCfg = 0xC0;          // Filter Configuration
+constexpr uint8_t ADCCfg = 0xD0;             // ADC Configuration
+constexpr uint8_t ADCCfg2 = 0xD1;            // ADC Configuration 2
+constexpr uint8_t ADCCfg3 = 0xD2;            // ADC Configuration 3
 constexpr uint8_t RelaxCfg = 0xC2;           // Relaxation Configuration
 constexpr uint8_t LearnCfg = 0xC3;           // Learn Configuration
 constexpr uint8_t MaskSOC = 0xC4;            // Mask SOC Register
 constexpr uint8_t PackCfg = 0xBB;            // Pack Configuration
+constexpr uint8_t HibCfg = 0xBA;             // Hibernate Configuration
+constexpr uint8_t NRCfg = 0xCF;              // NR Configuration
 
-// Voltage Measurements
+// Current Gain and Offset
+constexpr uint8_t CGain = 0xD3;              // Current Gain
+constexpr uint8_t COff = 0xD4;               // Current Offset
+constexpr uint8_t RCOMP0 = 0xD5;             // RCOMP0 Register
+constexpr uint8_t TempCo = 0xD6;             // Temperature Coefficient
+constexpr uint8_t IChgTerm = 0xD7;           // Charge Termination Current
+constexpr uint8_t NVCfg0 = 0xD8;             // NV Configuration 0
+constexpr uint8_t NVCfg1 = 0xD9;             // NV Configuration 1
+constexpr uint8_t NVCfg2 = 0xDA;             // NV Configuration 2
+
+// Real-time Measurements
 constexpr uint8_t VCell = 0xA8;              // Cell Voltage
 constexpr uint8_t AvgVCell = 0xA9;           // Average Cell Voltage
 constexpr uint8_t VByp = 0xAA;               // BYP Voltage
 constexpr uint8_t VSys = 0xAB;               // System Voltage
-constexpr uint8_t VAlertTh = 0xC5;           // Voltage Alert Threshold
-
-// Current Measurements
 constexpr uint8_t Current = 0xAC;            // Battery Current
 constexpr uint8_t AvgCurrent = 0xAD;         // Average Battery Current
+constexpr uint8_t Temp = 0xAE;               // Temperature
+constexpr uint8_t AvgTA = 0xAF;              // Average Temperature
 constexpr uint8_t ICHGIN = 0xB1;             // CHGIN Current
+constexpr uint8_t DieTemp = 0xB9;            // Die Temperature
+constexpr uint8_t Power = 0xBE;              // Power Register
+constexpr uint8_t AvgPower = 0xBF;           // Average Power
+
+// Voltage/Current Registers
+constexpr uint8_t VOCVTab = 0xC8;            // VOCV Table
+constexpr uint8_t VAlertTh = 0xC5;           // Voltage Alert Threshold
 constexpr uint8_t IAlertTh = 0xC7;           // Current Alert Threshold
 
-// Capacity and State of Charge
+// Temperature and Thermistor
+constexpr uint8_t TAlertTh = 0xC6;           // Temperature Alert Threshold
+constexpr uint8_t ThermCfg = 0xD3;           // Thermistor Configuration
+constexpr uint8_t NThermCfg = 0xC9;          // NTC Thermistor Configuration
+
+// State of Charge and Capacity
 constexpr uint8_t RepSOC = 0xB2;             // Reported State of Charge
 constexpr uint8_t RepCap = 0xB3;             // Reported Capacity
 constexpr uint8_t AvSOC = 0xB4;              // Average State of Charge
@@ -94,28 +144,68 @@ constexpr uint8_t AvCap = 0xB5;              // Available Capacity
 constexpr uint8_t MixSOC = 0xB6;             // Mixed State of Charge
 constexpr uint8_t MixCap = 0xB7;             // Mixed Capacity
 constexpr uint8_t FullCapNom = 0xB8;         // Nominal Full Capacity
+constexpr uint8_t FullCap = 0xB8;            // Full Capacity (same as FullCapNom)
 constexpr uint8_t SAlertTh = 0xC6;           // State of Charge Alert Threshold
 
-// Temperature
-constexpr uint8_t Temp = 0xAE;               // Temperature
-constexpr uint8_t AvgTA = 0xAF;              // Average Temperature
-constexpr uint8_t TAlertTh = 0xC8;           // Temperature Alert Threshold
-constexpr uint8_t DieTemp = 0xB9;            // Die Temperature
+// Cell Characterization
+constexpr uint8_t Design = 0xD8;             // Design Capacity
+constexpr uint8_t OCVTable0 = 0x12;          // OCV Table 0
+constexpr uint8_t OCVTable1 = 0x22;          // OCV Table 1
+constexpr uint8_t OCVTable2 = 0x32;          // OCV Table 2
+constexpr uint8_t OCVTable3 = 0x42;          // OCV Table 3
+constexpr uint8_t OCVTable4 = 0x52;          // OCV Table 4
+constexpr uint8_t OCVTable5 = 0x62;          // OCV Table 5
+constexpr uint8_t RComp0 = 0xD5;             // R-Comp 0
+constexpr uint8_t Mn = 0xD4;                 // Mn Register
+constexpr uint8_t Mh = 0xD3;                 // Mh Register
 
-// Time and Cycles
-constexpr uint8_t Time = 0xC9;               // Time Register
+// Cycle and Age Tracking
 constexpr uint8_t Cycles = 0xBA;             // Cycle Count
-constexpr uint8_t Age = 0xBC;                // Age Register
+constexpr uint8_t Age = 0xBC;                // Battery Age
+constexpr uint8_t Qh = 0xCD;                 // Charge Count
+constexpr uint8_t Ql = 0xCC;                 // Discharge Count
+constexpr uint8_t JAGA = 0xCB;               // JAG Register A
+constexpr uint8_t JAGBTop = 0xCA;            // JAG Register B Top (MSB)
+constexpr uint8_t JAGBBot = 0xCB;            // JAG Register B Bottom (LSB)
 
-// Power
-constexpr uint8_t Power = 0xBE;              // Power Register
-constexpr uint8_t AvgPower = 0xBF;           // Average Power
+// Time and Learning
+constexpr uint8_t Time = 0xC9;               // Time Register
+constexpr uint8_t Timer = 0xC9;              // Timer (same as Time)
+constexpr uint8_t TTF = 0xCE;                // Time To Full
+constexpr uint8_t TimeScaler = 0xCD;         // Time Scaler
+constexpr uint8_t HistC = 0xCF;              // History Capacity
+constexpr uint8_t HistSOC = 0xD0;            // History SOC
+constexpr uint8_t HistT = 0xD1;              // History Temperature
 
-// Characteristic Data Registers
-constexpr uint8_t QRTable00 = 0x12;          // QRTable00
-constexpr uint8_t QRTable10 = 0x22;          // QRTable10
-constexpr uint8_t QRTable20 = 0x32;          // QRTable20
-constexpr uint8_t QRTable30 = 0x42;          // QRTable30
+// Learned Data Registers
+constexpr uint8_t nRComp0 = 0xD5;            // nRComp0 Register
+constexpr uint8_t nTempCo = 0xD6;            // nTempCo Register
+constexpr uint8_t nIChgTerm = 0xD7;          // nIChgTerm Register
+constexpr uint8_t nQRTable00 = 0x12;         // nQRTable for 4.4V steps
+constexpr uint8_t nQRTable10 = 0x22;         // nQRTable for 4.3V steps
+constexpr uint8_t nQRTable20 = 0x32;         // nQRTable for 4.2V steps
+constexpr uint8_t nQRTable30 = 0x42;         // nQRTable for 4.1V steps
+
+// Additional Cell Characterization
+constexpr uint8_t CFastInt = 0xD3;           // CFastInt Register (Charge Fast Intercept)
+constexpr uint8_t CFastSlope = 0xD4;         // CFastSlope Register
+constexpr uint8_t Mx = 0xD5;                 // Mx Register (Cell Max Voltage)
+constexpr uint8_t Mi = 0xD6;                 // Mi Register (Cell Min Voltage)
+
+// Non-Volatile Charger Configuration (Learned Parameters)
+constexpr uint8_t nChgCfg0 = 0xE0;           // nChgCfg 0 - Charger Config Block 0
+constexpr uint8_t nChgCfg1 = 0xE1;           // nChgCfg 1 - Charger Config Block 1
+constexpr uint8_t nChgCfg2 = 0xE2;           // nChgCfg 2 - Charger Config Block 2
+constexpr uint8_t nChgCfg3 = 0xE3;           // nChgCfg 3 - Charger Config Block 3
+constexpr uint8_t nChgCfg4 = 0xE4;           // nChgCfg 4 - Charger Config Block 4
+constexpr uint8_t nChgCfg5 = 0xE5;           // nChgCfg 5 - Thermal Zone Boundary 1
+constexpr uint8_t nChgCfg6 = 0xE6;           // nChgCfg 6 - Thermal Zone Boundary 2
+constexpr uint8_t nChgCfg7 = 0xE7;           // nChgCfg 7 - Thermal Zone Boundary 3
+constexpr uint8_t nChgCfg8 = 0xE8;           // nChgCfg 8 - Boost Converter Calibration
+constexpr uint8_t nChgCfg9 = 0xE9;           // nChgCfg 9 - Input Current Limit Calibration
+constexpr uint8_t nChgCfg10 = 0xEA;          // nChgCfg 10 - Charge Current Offset
+constexpr uint8_t nChgCfg11 = 0xEB;          // nChgCfg 11 - IC Offset & Trim
+constexpr uint8_t nChgCfg12 = 0xEC;          // nChgCfg 12 - Reserved for future use
 
 // ============================================================================
 // BIT FIELD DEFINITIONS
@@ -752,6 +842,405 @@ public:
      * @return ESP_OK on success
      */
     esp_err_t set_soc_alert_threshold(uint8_t threshold_pct);
+
+    // ========================================================================
+    // ADVANCED FUEL GAUGE CONFIGURATION
+    // ========================================================================
+
+    /**
+     * @brief Configure filter settings for averaging
+     * @param voltage_filter Voltage filter setting
+     * @param current_filter Current filter setting
+     * @param temp_filter Temperature filter setting
+     * @return ESP_OK on success
+     */
+    esp_err_t set_filter_config(uint8_t voltage_filter, uint8_t current_filter, uint8_t temp_filter);
+
+    /**
+     * @brief Configure relaxation detection
+     * @param relax_cfg Relaxation configuration register value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_relaxation_config(uint8_t relax_cfg);
+
+    /**
+     * @brief Configure learning parameters
+     * @param learn_cfg Learning configuration register value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_learning_config(uint8_t learn_cfg);
+
+    /**
+     * @brief Configure hibernation mode
+     * @param hib_threshold Hibernation threshold in mA
+     * @param hib_enable Enable hibernation mode
+     * @return ESP_OK on success
+     */
+    esp_err_t set_hibernation_config(uint16_t hib_threshold, bool hib_enable);
+
+    /**
+     * @brief Configure ADC sampling
+     * @param adc_cfg ADC configuration register value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_adc_config(uint8_t adc_cfg);
+
+    /**
+     * @brief Read ADC configuration
+     * @param adc_cfg Pointer to store ADC configuration
+     * @return ESP_OK on success
+     */
+    esp_err_t get_adc_config(uint8_t* adc_cfg);
+
+    // ========================================================================
+    // CELL CHARACTERIZATION & LEARNING DATA
+    // ========================================================================
+
+    /**
+     * @brief Set charge termination current
+     * @param iterm_ma Termination current in mA
+     * @return ESP_OK on success
+     */
+    esp_err_t set_charge_termination_current(uint16_t iterm_ma);
+
+    /**
+     * @brief Get charge termination current
+     * @param iterm_ma Pointer to store termination current in mA
+     * @return ESP_OK on success
+     */
+    esp_err_t get_charge_termination_current(uint16_t* iterm_ma);
+
+    /**
+     * @brief Set resistance compensation (RComp)
+     * @param rcomp New RComp value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_rcomp(uint8_t rcomp);
+
+    /**
+     * @brief Get resistance compensation (RComp)
+     * @param rcomp Pointer to store RComp value
+     * @return ESP_OK on success
+     */
+    esp_err_t get_rcomp(uint8_t* rcomp);
+
+    /**
+     * @brief Set temperature coefficient
+     * @param tempco Temperature coefficient value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_temp_coefficient(uint8_t tempco);
+
+    /**
+     * @brief Get temperature coefficient
+     * @param tempco Pointer to store temperature coefficient
+     * @return ESP_OK on success
+     */
+    esp_err_t get_temp_coefficient(uint8_t* tempco);
+
+    /**
+     * @brief Set current gain and offset
+     * @param cgain Current gain register value
+     * @param coff Current offset register value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_current_calibration(uint8_t cgain, uint8_t coff);
+
+    /**
+     * @brief Get current gain and offset
+     * @param cgain Pointer to store current gain
+     * @param coff Pointer to store current offset
+     * @return ESP_OK on success
+     */
+    esp_err_t get_current_calibration(uint8_t* cgain, uint8_t* coff);
+
+    /**
+     * @brief Read design capacity
+     * @param capacity_mah Pointer to store design capacity in mAh
+     * @return ESP_OK on success
+     */
+    esp_err_t read_design_capacity(uint16_t* capacity_mah);
+
+    /**
+     * @brief Write design capacity
+     * @param capacity_mah Design capacity in mAh
+     * @return ESP_OK on success
+     */
+    esp_err_t write_design_capacity(uint16_t capacity_mah);
+
+    /**
+     * @brief Read OCV table entry
+     * @param table_index Table index (0-5)
+     * @param data Pointer to store OCV table data (16 bytes)
+     * @return ESP_OK on success
+     */
+    esp_err_t read_ocv_table(uint8_t table_index, uint8_t* data);
+
+    /**
+     * @brief Write OCV table entry
+     * @param table_index Table index (0-5)
+     * @param data OCV table data (16 bytes)
+     * @return ESP_OK on success
+     */
+    esp_err_t write_ocv_table(uint8_t table_index, const uint8_t* data);
+
+    // ========================================================================
+    // ADVANCED CHARGER CONFIGURATION
+    // ========================================================================
+
+    /**
+     * @brief Set CHGIN current measurement offset
+     * @param offset Offset value
+     * @return ESP_OK on success
+     */
+    esp_err_t set_chgin_offset(uint8_t offset);
+
+    /**
+     * @brief Set external input voltage regulation
+     * @param voltage_mv Input regulation voltage in mV
+     * @return ESP_OK on success
+     */
+    esp_err_t set_chgin_regulation_voltage(uint16_t voltage_mv);
+
+    /**
+     * @brief Get external input voltage regulation
+     * @param voltage_mv Pointer to store regulation voltage in mV
+     * @return ESP_OK on success
+     */
+    esp_err_t get_chgin_regulation_voltage(uint16_t* voltage_mv);
+
+    /**
+     * @brief Set system minimum voltage
+     * @param voltage_mv Minimum system voltage in mV (default 3500mV)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_sys_min_voltage(uint16_t voltage_mv);
+
+    /**
+     * @brief Set watchdog timer
+     * @param timeout_sec Watchdog timeout in seconds (0 to disable)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_watchdog_timer(uint8_t timeout_sec);
+
+    /**
+     * @brief Clear watchdog timer
+     * @return ESP_OK on success
+     */
+    esp_err_t clear_watchdog();
+
+    /**
+     * @brief Enable OTG (Reverse Boost) mode
+     * @param enable true to enable OTG
+     * @return ESP_OK on success
+     */
+    esp_err_t set_otg_mode(bool enable);
+
+    /**
+     * @brief Set OTG voltage (when in reverse boost)
+     * @param voltage_mv OTG output voltage in mV (typically 5100mV)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_otg_voltage(uint16_t voltage_mv);
+
+    /**
+     * @brief Configure boost converter
+     * @param boost_enable Enable boost converter
+     * @param boost_voltage Boost voltage in mV
+     * @return ESP_OK on success
+     */
+    esp_err_t configure_boost_converter(bool boost_enable, uint16_t boost_voltage);
+
+    /**
+     * @brief Set precharge configuration
+     * @param vprechg_mv Precharge voltage threshold
+     * @param iprechg_ma Precharge current
+     * @return ESP_OK on success
+     */
+    esp_err_t set_precharge_config(uint16_t vprechg_mv, uint16_t iprechg_ma);
+
+    /**
+     * @brief Set hysteresis for fast charge restart
+     * @param hysteresis_mv Charger restart hysteresis in mV
+     * @return ESP_OK on success
+     */
+    esp_err_t set_fast_charge_hysteresis(uint16_t hysteresis_mv);
+
+    // ========================================================================
+    // NON-VOLATILE CHARGER CONFIGURATION (nChgConfig)
+    // ========================================================================
+
+    /**
+     * @brief Read nChgConfig register block
+     * @param start_index Starting block index (0-12)
+     * @param data Pointer to buffer for read data
+     * @param len Number of bytes to read (max 13 for all blocks)
+     * @return ESP_OK on success
+     */
+    esp_err_t read_nchg_config(uint8_t start_index, uint8_t* data, uint8_t len);
+
+    /**
+     * @brief Write nChgConfig register block
+     * @param start_index Starting block index (0-12)
+     * @param data Pointer to data to write
+     * @param len Number of bytes to write
+     * @return ESP_OK on success
+     */
+    esp_err_t write_nchg_config(uint8_t start_index, const uint8_t* data, uint8_t len);
+
+    /**
+     * @brief Read all nChgConfig blocks (complete configuration)
+     * @param data Pointer to buffer for all 13 bytes of nChgConfig
+     * @return ESP_OK on success
+     */
+    esp_err_t read_all_nchg_config(uint8_t* data);
+
+    /**
+     * @brief Write all nChgConfig blocks (complete configuration)
+     * @param data Pointer to all 13 bytes of nChgConfig data
+     * @return ESP_OK on success
+     */
+    esp_err_t write_all_nchg_config(const uint8_t* data);
+
+    /**
+     * @brief Get learned charger configuration block 0
+     * @param config Pointer to store nChgCfg0 value
+     * @return ESP_OK on success
+     */
+    esp_err_t get_nchg_config_0(uint8_t* config);
+
+    /**
+     * @brief Set learned charger configuration block 0
+     * @param config nChgCfg0 value to write
+     * @return ESP_OK on success
+     */
+    esp_err_t set_nchg_config_0(uint8_t config);
+
+    /**
+     * @brief Get learned charger configuration block 1
+     * @param config Pointer to store nChgCfg1 value
+     * @return ESP_OK on success
+     */
+    esp_err_t get_nchg_config_1(uint8_t* config);
+
+    /**
+     * @brief Set learned charger configuration block 1
+     * @param config nChgCfg1 value to write
+     * @return ESP_OK on success
+     */
+    esp_err_t set_nchg_config_1(uint8_t config);
+
+    /**
+     * @brief Get learned charger configuration block 2
+     * @param config Pointer to store nChgCfg2 value
+     * @return ESP_OK on success
+     */
+    esp_err_t get_nchg_config_2(uint8_t* config);
+
+    /**
+     * @brief Set learned charger configuration block 2
+     * @param config nChgCfg2 value to write
+     * @return ESP_OK on success
+     */
+    esp_err_t set_nchg_config_2(uint8_t config);
+
+    /**
+     * @brief Get boost converter calibration
+     * @param calib Pointer to store boost calibration value (nChgCfg8)
+     * @return ESP_OK on success
+     */
+    esp_err_t get_boost_calibration(uint8_t* calib);
+
+    /**
+     * @brief Set boost converter calibration
+     * @param calib Boost calibration value (nChgCfg8)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_boost_calibration(uint8_t calib);
+
+    /**
+     * @brief Get input current limit calibration
+     * @param calib Pointer to store input current calibration (nChgCfg9)
+     * @return ESP_OK on success
+     */
+    esp_err_t get_input_current_calib(uint8_t* calib);
+
+    /**
+     * @brief Set input current limit calibration
+     * @param calib Input current calibration value (nChgCfg9)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_input_current_calib(uint8_t calib);
+
+    /**
+     * @brief Get charge current offset
+     * @param offset Pointer to store charge current offset (nChgCfg10)
+     * @return ESP_OK on success
+     */
+    esp_err_t get_charge_current_offset(uint8_t* offset);
+
+    /**
+     * @brief Set charge current offset
+     * @param offset Charge current offset value (nChgCfg10)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_charge_current_offset(uint8_t offset);
+
+    /**
+     * @brief Get IC offset and trim values
+     * @param offset_trim Pointer to store IC offset/trim value (nChgCfg11)
+     * @return ESP_OK on success
+     */
+    esp_err_t get_ic_offset_trim(uint8_t* offset_trim);
+
+    /**
+     * @brief Set IC offset and trim values
+     * @param offset_trim IC offset/trim value (nChgCfg11)
+     * @return ESP_OK on success
+     */
+    esp_err_t set_ic_offset_trim(uint8_t offset_trim);
+
+    /**
+     * @brief Get thermal zone boundary 1 (nChgCfg5)
+     * @param boundary Pointer to store boundary temperature setting
+     * @return ESP_OK on success
+     */
+    esp_err_t get_thermal_zone_boundary_1(uint8_t* boundary);
+
+    /**
+     * @brief Set thermal zone boundary 1 (nChgCfg5)
+     * @param boundary Boundary temperature setting
+     * @return ESP_OK on success
+     */
+    esp_err_t set_thermal_zone_boundary_1(uint8_t boundary);
+
+    /**
+     * @brief Get thermal zone boundary 2 (nChgCfg6)
+     * @param boundary Pointer to store boundary temperature setting
+     * @return ESP_OK on success
+     */
+    esp_err_t get_thermal_zone_boundary_2(uint8_t* boundary);
+
+    /**
+     * @brief Set thermal zone boundary 2 (nChgCfg6)
+     * @param boundary Boundary temperature setting
+     * @return ESP_OK on success
+     */
+    esp_err_t set_thermal_zone_boundary_2(uint8_t boundary);
+
+    /**
+     * @brief Get thermal zone boundary 3 (nChgCfg7)
+     * @param boundary Pointer to store boundary temperature setting
+     * @return ESP_OK on success
+     */
+    esp_err_t get_thermal_zone_boundary_3(uint8_t* boundary);
+
+    /**
+     * @brief Set thermal zone boundary 3 (nChgCfg7)
+     * @param boundary Boundary temperature setting
+     * @return ESP_OK on success
+     */
+    esp_err_t set_thermal_zone_boundary_3(uint8_t boundary);
 
     // ========================================================================
     // CONFIGURATION & RESET FUNCTIONS
